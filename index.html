@@ -1,0 +1,57 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>IPv4 Subnet Calculator and Network Address Planner</title>
+<link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+<body>
+<h1>IPv4 Subnet Calculator &amp; Network Address Planner</h1>
+{% if error %}<div class="error">{{ error }}</div>{% endif %}
+
+<div class="card">
+  <h2>1. Subnet Calculator</h2>
+  <form method="post">
+    <input type="hidden" name="action" value="calc">
+    <input name="ip" placeholder="IP address, e.g. 192.168.10.25" value="{{ form.get('ip','') }}" required>
+    <input name="prefix" placeholder="Prefix, e.g. 24" value="{{ form.get('prefix','') }}" required>
+    <button>Calculate</button>
+  </form>
+  {% if calc %}
+  <table>
+    <tr><th>Subnet mask</th><td>{{ calc.mask }}</td></tr>
+    <tr><th>Network address</th><td>{{ calc.network }}/{{ calc.prefix }}</td></tr>
+    <tr><th>Broadcast address</th><td>{{ calc.broadcast }}</td></tr>
+    <tr><th>First usable</th><td>{{ calc.first }}</td></tr>
+    <tr><th>Last usable</th><td>{{ calc.last }}</td></tr>
+    <tr><th>Total addresses</th><td>{{ calc.total }}</td></tr>
+    <tr><th>Usable hosts</th><td>{{ calc.usable }}</td></tr>
+    <tr><th>IP (binary)</th><td class="mono">{{ calc.binary_ip }}</td></tr>
+    <tr><th>Mask (binary)</th><td class="mono">{{ calc.binary_mask }}</td></tr>
+  </table>
+  {% if calc.note %}<p class="note">{{ calc.note }}</p>{% endif %}
+  {% endif %}
+</div>
+
+<div class="card">
+  <h2>2. Network Address Planner (VLSM)</h2>
+  <form method="post">
+    <input type="hidden" name="action" value="plan">
+    <input name="parent" placeholder="Parent network, e.g. 192.168.10.0/24" value="{{ form.get('parent','') }}" required>
+    <textarea name="reqs" rows="5" placeholder="One department per line:&#10;IT,100&#10;HR,50&#10;Finance,25" required>{{ form.get('reqs','') }}</textarea>
+    <button>Plan</button>
+  </form>
+  {% if plan %}
+  <div class="scroll"><table>
+    <tr><th>Department</th><th>Hosts needed</th><th>Network</th><th>Prefix</th><th>Host range</th><th>Broadcast</th><th>Usable</th></tr>
+    {% for r in plan %}
+    <tr><td>{{ r.name }}</td><td>{{ r.hosts }}</td><td>{{ r.network }}</td><td>/{{ r.prefix }}</td>
+        <td>{{ r.first }} – {{ r.last }}</td><td>{{ r.broadcast }}</td><td>{{ r.usable }}</td></tr>
+    {% endfor %}
+  </table></div>
+  <p class="note">Unallocated addresses remaining: {{ free }}</p>
+  {% endif %}
+</div>
+</body>
+</html>
